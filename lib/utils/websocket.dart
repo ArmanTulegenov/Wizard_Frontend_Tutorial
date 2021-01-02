@@ -1,38 +1,32 @@
-import 'package:web_socket_channel/html.dart';
 import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/status.dart' as status;
+
 import 'websocket_listener.dart';
 
 class WebSocketServiceSingleton {
+  static final String serviceEndPoint =
+      'wss://hairstyle.javasoft.solutions/api/ws/';
+  static List<WebSocketListener> listeners = [];
 
-  static final String serviceEndPoint = 'wss://hairstyle.javasoft.solutions/api/ws/';
-  static List<WebSocketListener> listeners;
-
-  static WebSocketServiceSingleton _instance;
+  static WebSocketServiceSingleton _instance = new WebSocketServiceSingleton._internal();
   static IOWebSocketChannel channel;
 
-  static WebSocketServiceSingleton get instance {
-    if (_instance == null) {
-      _instance = new WebSocketServiceSingleton()._();
-    }
+  factory WebSocketServiceSingleton() {
     return _instance;
   }
-  _() {
-    listeners = new List();
-    connect();
-  }
-  factory WebSocketServiceSingleton() => instance;
 
+  WebSocketServiceSingleton._internal() {
+    if (channel == null) {
+      channel = IOWebSocketChannel.connect(serviceEndPoint,
+          headers: {'Connection': 'upgrade', 'Upgrade': 'websocket'});
+      channel.stream.listen((message) {
+        for (final listener in listeners) {
+          listener.onMessage(message);
+        }
+      });
+      channel.sink.add("received!");    }
+  }
   void addListener(WebSocketListener listener) {
     listeners.add(listener);
   }
 
-  void connect () {
-    channel = IOWebSocketChannel.connect(serviceEndPoint,  headers: {'Connection': 'upgrade', 'Upgrade': 'websocket'});
-    channel.stream.listen((message) {
-      for (final listener in listeners) {
-        listener.onMessage(message);
-      }
-    });
-  }
 }

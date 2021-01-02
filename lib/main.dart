@@ -52,7 +52,6 @@ void main() {
       '/home': (context) => MyHomePage(title: 'Flutter Demo Home Page'),
       '/registration': (context) => RegistrationPage(title: 'Flutter Demo Home Page'),
       '/confirmation': (context) => ConfirmationPage(title: 'Flutter Demo Home Page'),
-
     },
   ));
 }
