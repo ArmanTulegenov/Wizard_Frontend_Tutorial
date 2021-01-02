@@ -43,9 +43,9 @@ class _ConfirmationPageState extends State<ConfirmationPage> {
 
   void _launchURL() async {
     if (await canLaunch(url)) {
-      await launch(url);
       Navigator.pushReplacementNamed(context, '/home',
           arguments: {'identity': identity});
+      await launch(url);
     } else {
       throw 'Could not launch $url';
     }
