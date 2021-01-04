@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/pages/registration.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 import '../app_localizations.dart';
-import '../utils/websocket.dart';
-import '../utils/websocket_listener.dart';
+import '../utils/websocket/websocket.dart';
+import '../utils/websocket/websocket_listener.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -39,8 +40,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    WebSocketServiceSingleton();
+    initWebsocket();
     super.initState();
+  }
+
+  void initWebsocket() async {
+    final WebSocketServiceSingleton webSocketSingleton =  WebSocketServiceSingleton();
   }
 
   @override
