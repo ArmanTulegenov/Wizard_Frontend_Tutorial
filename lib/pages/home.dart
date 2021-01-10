@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/pages/registration.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import '../app_localizations.dart';
-import '../utils/websocket/websocket.dart';
-import '../utils/websocket/websocket_listener.dart';
+import 'package:flutter_app/services/sqlite/sqlite_service.dart';
+import '../services/websocket/websocket_service.dart';
+import '../services/crypto/crypto_service.dart';
+import '../models/user_details.dart';
+
+import 'package:url_launcher/url_launcher.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
@@ -24,8 +25,38 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final SqliteService sqlService = new SqliteService();
+  final WebSocketService webSocketServiceSingleton = new WebSocketService();
+
   int _counter = 0;
   Map data = {};
+
+  /*
+    void _launchURL() async {
+    if (await canLaunch(url)) {
+      Navigator.pushReplacementNamed(context, '/home',
+          arguments: {'identity': identity});
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+   */
+
+  Future<void> processLoginOrRegister(String userName, String pinCode) async {
+    UserDetails userDetails = await sqlService.getUserDetailsByUserName(userName, pinCode);
+    if (null == userDetails) {
+      // extract values
+      String password = CryptoUtils.aesDecrypt(pinCode, userDetails.password);
+      // send connect
+      await webSocketServiceSingleton.doLogin(userName, password);
+    } else {
+      // send registration link
+      await webSocketServiceSingleton.doRegistration(userName);
+      //
+      // Navigator.pushReplacementNamed(context, '/registration');
+    }
+  }
 
   void _incrementCounter() {
     setState(() {
@@ -39,24 +70,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  void initState() {
-    initWebsocket();
-    super.initState();
-  }
-
-  void initWebsocket() async {
-    final WebSocketServiceSingleton webSocketSingleton =  WebSocketServiceSingleton();
-  }
-
-  @override
   Widget build(BuildContext context) {
     TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
-    final myController = TextEditingController();
+    final identityController = TextEditingController();
+    final pinController = TextEditingController();
 
     data = ModalRoute.of(context).settings.arguments;
 
     if (null != data && data.containsKey('identity')) {
-      myController.text = data['identity'];
+      identityController.text = data['identity'];
     }
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
@@ -67,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final emailField = TextField(
       obscureText: false,
       style: style,
-      controller: myController,
+      controller: identityController,
       decoration: InputDecoration(
           contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
           hintText: "Identity",
@@ -77,9 +99,10 @@ class _MyHomePageState extends State<MyHomePage> {
     final passwordField = TextField(
       obscureText: true,
       style: style,
+      controller: pinController,
       decoration: InputDecoration(
           contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-          hintText: "Password",
+          hintText: "Pin code",
           border:
               OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))),
     );
@@ -90,21 +113,17 @@ class _MyHomePageState extends State<MyHomePage> {
       child: MaterialButton(
         minWidth: MediaQuery.of(context).size.width,
         padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-        onPressed: () {},
-        child: Text("Login",
+        onPressed: () {
+          String userName = identityController.text.trim();
+          String pinCode = pinController.text.trim();
+          processLoginOrRegister(userName, pinCode);
+        },
+        child: Text("Login Or Register",
             textAlign: TextAlign.center,
             style: style.copyWith(
                 color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
-    final registerButton = GestureDetector(
-        child: Text("Register", style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
-        onTap: () {
-           // do what you need to do when "Click here" gets clicked
-          // Navigator.push(context, MaterialPageRoute(builder: (context)=> RegistrationPage(title: 'Registration page',)));
-          Navigator.pushReplacementNamed(context, '/registration');
-        });
-
     return Scaffold(
         body: Center(
       child: Container(
@@ -126,7 +145,6 @@ class _MyHomePageState extends State<MyHomePage> {
               SizedBox(
                 height: 15.0,
               ),
-              registerButton,
             ],
           ),
         ),

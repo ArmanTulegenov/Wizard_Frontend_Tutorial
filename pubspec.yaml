@@ -29,6 +29,7 @@ dependencies:
   web_socket_channel: ^1.1.0
   sqflite: any
   path_provider: any
+  encrypt: ^4.0.2
   flutter_localizations:
     sdk: flutter
 
