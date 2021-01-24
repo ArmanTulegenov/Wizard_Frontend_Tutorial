@@ -13,7 +13,7 @@ class CryptoUtils {
     return String.fromCharCodes(base64Decode(data));
   }
 
-  static aesEncrypt(String encryptKey, String plainText) {
+  static dynamic aesEncrypt(String encryptKey, String plainText) {
     try {
       encryptKey = prepareEncryptKey(encryptKey);
       final key = Key.fromUtf8(encryptKey);
@@ -23,7 +23,7 @@ class CryptoUtils {
       return encrypted.base64;
     } catch (err) {
       print("aes encode error:$err");
-      return plainText;
+      return null;
     }
   }
 
@@ -37,7 +37,7 @@ class CryptoUtils {
       return decrypted;
     } catch (err) {
       print("aes decode error:$err");
-      return encrypted;
+      return null;
     }
   }
 

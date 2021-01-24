@@ -46,12 +46,12 @@ class SqliteService {
     }
     var result = await _database.query("Preferences");
     UserDetails userDetails = new UserDetails();
-
     for (var row in result) {
       if (row['name'] == 'user_name') {
         userDetails.userName = row['value'];
       } else if (row['name'] == 'password') {
-        userDetails.password = CryptoUtils.aesDecrypt(pinCode, row['value']);
+        var decryptedPassword = CryptoUtils.aesDecrypt(pinCode, row['value']);
+        userDetails.password = decryptedPassword;
       }
     }
     return userDetails;

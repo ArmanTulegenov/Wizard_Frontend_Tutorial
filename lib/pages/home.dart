@@ -45,14 +45,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> processLoginOrRegister(String userName, String pinCode) async {
     UserDetails userDetails = await sqlService.getUserDetailsByUserName(userName, pinCode);
-    if (null == userDetails) {
-      // extract values
-      String password = CryptoUtils.aesDecrypt(pinCode, userDetails.password);
+    if (null == userDetails ||  null == userDetails.password) {
       // send connect
-      await webSocketServiceSingleton.doLogin(userName, password);
+      await webSocketServiceSingleton.doRegistrationOrRestore(userName);
     } else {
       // send registration link
-      await webSocketServiceSingleton.doRegistration(userName);
+      await webSocketServiceSingleton.doLogin(userName, userDetails.password);
       //
       // Navigator.pushReplacementNamed(context, '/registration');
     }

@@ -1,3 +1,6 @@
+import '../../models/message/message.dart';
+
 abstract class WebSocketListener {
-  void onMessage(String message);
+  String getMessageType();
+  void onMessage(Message message);
 }
