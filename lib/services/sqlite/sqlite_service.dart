@@ -48,7 +48,7 @@ class SqliteService {
     UserDetails userDetails = new UserDetails();
     for (var row in result) {
       if (row['name'] == 'user_name') {
-        userDetails.userName = row['value'];
+        userDetails.identity = row['value'];
       } else if (row['name'] == 'password') {
         var decryptedPassword = CryptoUtils.aesDecrypt(pinCode, row['value']);
         userDetails.password = decryptedPassword;

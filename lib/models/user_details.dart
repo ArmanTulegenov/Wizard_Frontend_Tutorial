@@ -1,15 +1,15 @@
 class UserDetails {
-  String _userName;
+  String _identity;
   String _password;
 
-  String get userName {
-    return _userName;
+  String get indentity {
+    return _identity;
   }
   String get password {
     return _password;
   }
-  void set userName(String userName) {
-    _userName = userName;
+  void set identity(String identity) {
+    _identity = identity;
   }
   void set password(String password) {
     _password = password;
