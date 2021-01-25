@@ -27,7 +27,7 @@ class WebSocketService {
     _channel = IOWebSocketChannel.connect(serviceEndPoint,
         headers: {'Connection': 'upgrade', 'Upgrade': 'websocket'});
     _channel.stream.listen((message) {
-      Message msg = json.decode(message);
+      Message msg = Message.fromJson(message);
       for (var listener in listeners[msg.type]) {
         listener.onMessage(message);
       }
