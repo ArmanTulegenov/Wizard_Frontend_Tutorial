@@ -40,7 +40,7 @@ class SqliteService {
   }
 
   Future<UserDetails> getUserDetailsByUserName(
-      String userName, String pinCode) async {
+      String pinCode) async {
     if (null == _database) {
       return null;
     }

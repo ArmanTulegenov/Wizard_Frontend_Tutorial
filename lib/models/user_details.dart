@@ -2,7 +2,7 @@ class UserDetails {
   String _identity;
   String _password;
 
-  String get indentity {
+  String get identity {
     return _identity;
   }
   String get password {

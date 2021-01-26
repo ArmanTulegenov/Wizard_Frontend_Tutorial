@@ -1,4 +1,4 @@
-import '../../models/message/message.dart';
+import '../../../models/message/message.dart';
 
 abstract class WebSocketListener<T> {
   String getMessageType();

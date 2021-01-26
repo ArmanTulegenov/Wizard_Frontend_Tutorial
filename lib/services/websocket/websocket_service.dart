@@ -1,10 +1,11 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:flutter_app/models/user_details.dart';
 import 'package:web_socket_channel/io.dart';
 
 import '../../models/message/message.dart';
-import '../../services/websocket/websocket_listener.dart';
+import 'listener/websocket_listener.dart';
 
 class WebSocketService {
   static final String serviceEndPoint =
@@ -34,8 +35,8 @@ class WebSocketService {
     });
   }
 
-  Future<void> doLogin(String login, String password) async {
-    _channel.sink.add('login $login $password');
+  Future<void> doLogin(UserDetails userDetails) async {
+    _channel.sink.add('login ${userDetails.identity} ${userDetails.password}');
   }
 
   Future<void> doRegistrationOrRestore(String login) async {

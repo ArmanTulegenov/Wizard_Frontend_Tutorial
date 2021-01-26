@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/services/sqlite/sqlite_service.dart';
+import 'package:flutter_app/services/websocket/listener/user_link_listener.dart';
 import '../services/websocket/websocket_service.dart';
 import '../services/crypto/crypto_service.dart';
 import '../models/user_details.dart';
@@ -43,14 +44,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
    */
 
-  Future<void> processLoginOrRegister(String userName, String pinCode) async {
-    UserDetails userDetails = await sqlService.getUserDetailsByUserName(userName, pinCode);
+  Future<void> processLoginOrRegister(String pinCode) async {
+    UserDetails userDetails = await sqlService.getUserDetailsByUserName(pinCode);
     if (null == userDetails ||  null == userDetails.password) {
       // send connect
-      await webSocketServiceSingleton.doRegistrationOrRestore(userName);
+      // create identity
+      await webSocketServiceSingleton.doRegistrationOrRestore(pinCode);
     } else {
       // send registration link
-      await webSocketServiceSingleton.doLogin(userName, userDetails.password);
+      await webSocketServiceSingleton.doLogin(userDetails);
       //
       // Navigator.pushReplacementNamed(context, '/registration');
     }
@@ -68,32 +70,24 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    webSocketServiceSingleton.addListener(UserLinkListener());
+  }
+
+  @override
   Widget build(BuildContext context) {
     TextStyle style = TextStyle(fontFamily: 'Montserrat', fontSize: 20.0);
-    final identityController = TextEditingController();
     final pinController = TextEditingController();
 
     data = ModalRoute.of(context).settings.arguments;
 
-    if (null != data && data.containsKey('identity')) {
-      identityController.text = data['identity'];
-    }
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    final emailField = TextField(
-      obscureText: false,
-      style: style,
-      controller: identityController,
-      decoration: InputDecoration(
-          contentPadding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-          hintText: "Identity",
-          border:
-              OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))),
-    );
     final passwordField = TextField(
       obscureText: true,
       style: style,
@@ -104,7 +98,7 @@ class _MyHomePageState extends State<MyHomePage> {
           border:
               OutlineInputBorder(borderRadius: BorderRadius.circular(32.0))),
     );
-    final loginButton = Material(
+    final registerOrLoginButton = Material(
       elevation: 5.0,
       borderRadius: BorderRadius.circular(30.0),
       color: Color(0xff01A0C7),
@@ -112,9 +106,8 @@ class _MyHomePageState extends State<MyHomePage> {
         minWidth: MediaQuery.of(context).size.width,
         padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
         onPressed: () {
-          String userName = identityController.text.trim();
           String pinCode = pinController.text.trim();
-          processLoginOrRegister(userName, pinCode);
+          processLoginOrRegister(pinCode);
         },
         child: Text("Login Or Register",
             textAlign: TextAlign.center,
@@ -133,13 +126,11 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               SizedBox(height: 15.0),
-              emailField,
-              SizedBox(height: 15.0),
               passwordField,
               SizedBox(
                 height: 15.0,
               ),
-              loginButton,
+              registerOrLoginButton,
               SizedBox(
                 height: 15.0,
               ),
